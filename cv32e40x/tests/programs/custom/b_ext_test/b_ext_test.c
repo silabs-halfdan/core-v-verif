@@ -5,13 +5,14 @@
 unsigned int test;
 
 int test_shnadd(void);
+int test_clz(void);
 
 int main(int argc, char *argv[])
 {  
   int failures=0;
 
   failures += test_shnadd();
-
+  //failures += test_clz();
 
   if(failures == 0){
     return EXIT_SUCCESS;
@@ -21,11 +22,34 @@ int main(int argc, char *argv[])
   }
 }
 
+/*
+int test_clz(void){
+  
+  int failures = 0;
+  
+  // Store 8 in t3
+  __asm__ volatile("addi t3, zero, 8");
+
+  // Store CLZ result in t5
+  __asm__ volatile("clz t5, t3");
+
+  // Store t5 to test
+  __asm__ volatile("sw t5, test, t0");
+
+  if (test != 28) {
+    printf("ERROR, CLZ result not as expected\n");
+    failures++;
+  }
+  
+  return failures;
+}
+*/
 
 int test_shnadd(void){
   
   int failures = 0;
 
+  
   printf("Testing SHnADD\n");
 
   // Store 5 and 7 in t3, t4
