@@ -432,7 +432,7 @@ function instr_group_t get_instr_group(instr_name_t name);
                    AMOOR_W,AMOMIN_W,AMOMAX_W,AMOMINU_W,AMOMAXU_W})
     return AMEM_GROUP;
   
-  `uvm_fatal("ISACOV", $sformatf("Called get_instr_group with unmapped type: %s", name.name()));
+  //`uvm_fatal("ISACOV", $sformatf("Called get_instr_group with unmapped type: %s", name.name()));
 endfunction : get_instr_group
 
 `endif // __UVMA_ISACOV_TDEFS_SV__
