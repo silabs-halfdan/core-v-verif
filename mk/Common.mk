@@ -219,7 +219,8 @@ RISCV_PREFIX     = riscv32-$(PULP_MARCH)-elf-
 RISCV_EXE_PREFIX = $(RISCV)/bin/$(RISCV_PREFIX)
 endif
 
-CFLAGS ?= -Os -g -static -mabi=ilp32 -march=rv32imc -Wall -pedantic
+CFLAGS ?= -Os -g -static -mabi=ilp32 -march=rv32imczba0p93 -Wall -pedantic --verbose
+#CFLAGS ?= -Os -g -static -mabi=ilp32 -march=rv32imczba0p93_zbb0p93 -Wall -pedantic --verbose
 
 # FIXME:strichmo:Repeating this code until we fully deprecate CUSTOM_PROG, hopefully next PR
 ifeq ($(firstword $(subst _, ,$(CUSTOM_PROG))),pulp)
@@ -393,7 +394,7 @@ clean-bsp:
 .PRECIOUS : %debug_test_reset.elf
 .PRECIOUS : %debug_test_trigger.elf
 .PRECIOUS : %debug_test_known_miscompares.elf
-	
+
 # Prepare file list for .elf
 # Get the source file names from the BSP directory
 PREREQ_BSP_FILES  = $(filter %.c %.S %.ld,$(wildcard $(BSP)/*))
@@ -477,11 +478,15 @@ COREMARK_CFLAGS = \
 		$(TEST_CFLAGS) \
 		$(CFLAGS) \
 		-o $@ \
+		-nostdlib \
 		-nostartfiles \
 		$^ \
 		-T $(BSP)/link.ld \
 		-L $(BSP) \
-		-lcv-verif
+		-lcv-verif \
+		/tool/gcc/riscv32_10.2.0-rvb/rhel7-64/lib/gcc/riscv32-unknown-elf/10.2.0/../../../../riscv32-unknown-elf/lib/rv32imac/ilp32/libnosys.a \
+		/tool/gcc/riscv32_10.2.0-rvb/rhel7-64/lib/gcc/riscv32-unknown-elf/10.2.0/../../../../riscv32-unknown-elf/lib/rv32imac/ilp32/libc.a \
+		/tool/gcc/riscv32_10.2.0-rvb/rhel7-64/lib/gcc/riscv32-unknown-elf/10.2.0/../../../../lib/gcc/riscv32-unknown-elf/10.2.0/rv32imac/ilp32/libgcc.a
 
 # This target selected if only %.S exists
 %.elf: %.S

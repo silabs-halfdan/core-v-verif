@@ -26,7 +26,7 @@
 class uvme_cv32e40x_cfg_c extends uvm_object;
 
    // Status of plusarg to control testbench features
-   bit                           use_iss  = 0;   
+   bit                           use_iss  = 0;
    bit                           disable_csr_check = 0;
 
    // Integrals
@@ -40,12 +40,12 @@ class uvme_cv32e40x_cfg_c extends uvm_object;
    rand int unsigned             sys_clk_period;
    
    // Agent cfg handles
-   rand uvma_isacov_cfg_c           isacov_cfg;
-   rand uvma_clknrst_cfg_c          clknrst_cfg;
-   rand uvma_interrupt_cfg_c        interrupt_cfg;
-   rand uvma_debug_cfg_c            debug_cfg;
-   rand uvma_obi_cfg_c              obi_instr_cfg;
-   rand uvma_obi_cfg_c              obi_data_cfg;
+   rand uvma_isacov_cfg_c     isacov_cfg;
+   rand uvma_clknrst_cfg_c    clknrst_cfg;
+   rand uvma_interrupt_cfg_c  interrupt_cfg;
+   rand uvma_debug_cfg_c      debug_cfg;
+   rand uvma_obi_cfg_c        obi_instr_cfg;
+   rand uvma_obi_cfg_c        obi_data_cfg;
    rand uvma_rvfi_cfg_c#(ILEN,XLEN) rvfi_cfg;
    rand uvma_rvvi_cfg_c#(ILEN,XLEN) rvvi_cfg;
    
@@ -62,7 +62,7 @@ class uvme_cv32e40x_cfg_c extends uvm_object;
       `uvm_field_object(isacov_cfg    , UVM_DEFAULT)
       `uvm_field_object(clknrst_cfg   , UVM_DEFAULT)
       `uvm_field_object(interrupt_cfg , UVM_DEFAULT)
-      `uvm_field_object(debug_cfg     , UVM_DEFAULT)
+      `uvm_field_object(debug_cfg  , UVM_DEFAULT)
       `uvm_field_object(obi_instr_cfg , UVM_DEFAULT)
       `uvm_field_object(obi_data_cfg  , UVM_DEFAULT)
       `uvm_field_object(rvfi_cfg      , UVM_DEFAULT)
@@ -88,7 +88,7 @@ class uvme_cv32e40x_cfg_c extends uvm_object;
          debug_cfg.enabled     == 1;
          obi_instr_cfg.enabled == 1;
          obi_data_cfg.enabled  == 1;
-         rvfi_cfg.enabled      == 1;         
+         rvfi_cfg.enabled      == 1;
          rvvi_cfg.enabled      == use_iss;
       }
       obi_instr_cfg.write_enabled == 0;
@@ -138,7 +138,7 @@ class uvme_cv32e40x_cfg_c extends uvm_object;
       // FIXME:strichmo:restore when debug coverage model is fixed
       debug_cfg.cov_model_enabled == 0;
 
-      if (cov_model_enabled) {         
+      if (cov_model_enabled) {
          isacov_cfg.cov_model_enabled    == 1;
          obi_instr_cfg.cov_model_enabled == 1;
          obi_data_cfg.cov_model_enabled  == 1;
@@ -168,7 +168,7 @@ function uvme_cv32e40x_cfg_c::new(string name="uvme_cv32e40x_cfg");
 
    if ($test$plusargs("USE_ISS")) 
       use_iss = 1;
-   
+
    if ($test$plusargs("disable_csr_chk")) 
       disable_csr_check = 1;
 
