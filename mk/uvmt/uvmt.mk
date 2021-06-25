@@ -126,6 +126,12 @@ COMPLIANCE_PKG   := $(CORE_V_VERIF)/$(CV_CORE_LC)/vendor_lib/riscv/riscv-complia
 EMBENCH_PKG	:= $(CORE_V_VERIF)/$(CV_CORE_LC)/vendor_lib/embench
 EMBENCH_TESTS	:= $(CORE_V_VERIF)/$(CV_CORE_LC)/tests/programs/embench
 
+# Disassembler
+DPI_DASM_PKG       := $(CORE_V_VERIF)/lib/dpi_dasm
+DPI_DASM_SPIKE_PKG := $(CORE_V_VERIF)/$(CV_CORE_LC)/vendor_lib/dpi_dasm_spike
+export DPI_DASM_ROOT       = $(DPI_DASM_PKG)
+export DPI_DASM_SPIKE_ROOT = $(DPI_DASM_SPIKE_PKG)
+
 # TB source files for the CV32E core
 TBSRC_TOP   := $(TBSRC_HOME)/uvmt/uvmt_$(CV_CORE_LC)_tb.sv
 TBSRC_HOME  := $(CORE_V_VERIF)/$(CV_CORE_LC)/tb
@@ -177,6 +183,9 @@ clone_riscv-dv:
 clone_embench:
 	$(CLONE_EMBENCH_CMD)
 
+clone_dpi_dasm_spike:
+	$(CLONE_DPI_DASM_SPIKE_CMD)
+
 $(CV_CORE_PKG):
 	echo "Cloning"
 	$(CLONE_CV_CORE_CMD)
@@ -189,6 +198,9 @@ $(COMPLIANCE_PKG):
 
 $(EMBENCH_PKG):
 	$(CLONE_EMBENCH_CMD)
+
+$(DPI_DASM_SPIKE_PKG):
+	$(CLONE_DPI_DASM_SPIKE_CMD)
 
 ###############################################################################
 # RISC-V Compliance Test-suite
@@ -276,6 +288,35 @@ embench: $(EMBENCH_PKG)
 	-d $(EMB_DEBUG_ARG) \
 
 ###############################################################################
+# ISACOV (ISA coverage)
+#   Compare the log against the tracer log.
+#   This checks that sampling went correctly without false positives/negatives.
+
+ISACOV_LOGDIR = $($(SIMULATOR_UC)_RESULTS)/$(CFG)/$(TEST)_$(RUN_INDEX)
+ISACOV_TRACELOG = $(ISACOV_LOGDIR)/trace_core_00000000.log
+ISACOV_AGENTLOG = $(ISACOV_LOGDIR)/uvm_test_top.env.isacov_agent.trn.log
+
+isacov_logdiff:
+	@echo checking that env/dirs/files are as expected...
+		@printenv TEST > /dev/null || (echo specify TEST; false)
+		@ls $(ISACOV_LOGDIR) > /dev/null
+		@ls $(ISACOV_TRACELOG) > /dev/null
+		@ls $(ISACOV_AGENTLOG) > /dev/null
+	@echo filtering logs...
+		@cat $(ISACOV_TRACELOG) \
+			| sed 's/\(.*\)   \(.*\)/\1/' | awk '{$$1=$$2=$$3=$$4=$$5=""; $$0=$$0; $$1=$$1; print $$0}' \
+			| tail -n +2 > trace.tmp
+		@cat $(ISACOV_AGENTLOG) \
+			| awk -F '\t' '{print $$2}' | tr A-Z a-z \
+			| tail -n +2 > agent.tmp
+	@echo diffing the instruction sequences...
+		@echo saving to $(ISACOV_LOGDIR)/isacov_logdiff
+		@rm -rf $(ISACOV_LOGDIR)/isacov_logdiff
+		@diff trace.tmp agent.tmp > $(ISACOV_LOGDIR)/isacov_logdiff; true
+		@rm -rf trace.tmp agent.tmp
+		@(test ! -s $(ISACOV_LOGDIR)/isacov_logdiff && echo OK) || (echo FAIL; false)
+
+###############################################################################
 # Include the targets/rules for the selected SystemVerilog simulator
 #ifeq ($(SIMULATOR), unsim)
 #include unsim.mk
@@ -335,3 +376,6 @@ clean_embench:
 	rm -rf $(EMBENCH_PKG)
 	cd $(EMBENCH_TESTS) && \
 	find . ! -path . ! -path ./README.md -delete
+
+clean_dpi_dasm_spike:
+	rm -rf $(DPI_DASM_SPIKE_PKG)

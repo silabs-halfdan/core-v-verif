@@ -36,7 +36,7 @@ DVE              = $(CV_TOOL_PREFIX)dve
 URG               = $(CV_SIM_PREFIX)urg
 
 # Paths
-VCS_RESULTS     ?= $(if $(CV_RESULTS),$(CV_RESULTS)/vcs_results,$(MAKE_PATH)/vcs_results)
+VCS_RESULTS     ?= $(if $(CV_RESULTS),$(abspath $(CV_RESULTS))/vcs_results,$(MAKE_PATH)/vcs_results)
 VCS_COREVDV_RESULTS ?= $(VCS_RESULTS)/corev-dv
 VCS_DIR         ?= $(VCS_RESULTS)/$(CFG)/vcs.d
 VCS_ELAB_COV     = -cm line+cond+tgl+fsm+branch+assert  -cm_dir $(MAKECMDGOALS)/$(MAKECMDGOALS).vdb
@@ -137,7 +137,10 @@ ifeq ($(call IS_YES,$(USE_ISS)),YES)
 endif
 
 VCS_RUN_BASE_FLAGS   ?= $(VCS_GUI) \
-                         $(VCS_PLUSARGS) +ntb_random_seed=$(RNDSEED) -sv_lib $(VCS_OVP_MODEL_DPI)
+                        $(VCS_PLUSARGS) +ntb_random_seed=$(RNDSEED) \
+						-sv_lib $(VCS_OVP_MODEL_DPI) \
+						-sv_lib $(DPI_DASM_LIB)
+
 # Simulate using latest elab
 VCS_RUN_FLAGS        ?= 
 VCS_RUN_FLAGS        += $(VCS_RUN_BASE_FLAGS)
@@ -350,5 +353,5 @@ clean_eclipse:
 	rm  -rf workspace
 
 # All generated files plus the clone of the RTL
-clean_all: clean clean_eclipse clean_riscv-dv clean_test_programs clean-bsp clean_compliance clean_embench
+clean_all: clean clean_eclipse clean_riscv-dv clean_test_programs clean-bsp clean_compliance clean_embench clean_dpi_dasm_spike
 	rm -rf $(CV_CORE_PKG)

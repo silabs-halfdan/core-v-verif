@@ -15,7 +15,7 @@ export SHELL = /bin/bash
 
 CV_CORE_REPO   ?= https://github.com/openhwgroup/cv32e40x
 CV_CORE_BRANCH ?= master
-CV_CORE_HASH   ?= b62250f81acc8505556b43e341c19668b4f8a5d8
+CV_CORE_HASH   ?= e0fdb3a9e15ee304b4e63da1934c927ab47df757
 CV_CORE_TAG    ?= none
 
 RISCVDV_REPO    ?= https://github.com/google/riscv-dv
@@ -31,3 +31,8 @@ COMPLIANCE_BRANCH ?= strichmo/pr/cv32e40x_initial_old_compliance
 # 2020-08-19
 COMPLIANCE_HASH   ?= cf29051b177ba61b8c39de91c33d20d202697423
 
+# This Spike repo is only cloned when the DPI disassembler needs to be rebuilt 
+# Typically users can simply use the checked-in shared library
+DPI_DASM_SPIKE_REPO   ?= https://github.com/riscv/riscv-isa-sim.git
+DPI_DASM_SPIKE_BRANCH ?= master
+DPI_DASM_SPIKE_HASH   ?= 8faa928819fb551325e76b463fc0c978e22f5be3

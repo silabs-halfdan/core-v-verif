@@ -75,6 +75,10 @@ ifndef COMPLIANCE_REPO
 $(error Must define a COMPLIANCE_REPO to use the common makefile)
 endif
 
+ifndef DPI_DASM_SPIKE_REPO
+$(warning Must define a DPI_DASM_SPIKE_REPO to use the common makefile)
+endif
+
 ###############################################################################
 # Generate command to clone or symlink the core RTL
 ifeq ($(CV_CORE_PATH),)
@@ -141,7 +145,23 @@ ifeq ($(EMBENCH_HASH), head)
 else
   CLONE_EMBENCH_CMD = $(TMP5); cd $(EMBENCH_PKG); git checkout $(EMBENCH_HASH)
 endif
-# RISCV-DV repo var end
+# EMBench repo var end
+
+###############################################################################
+# Generate command to clone Spike for the Disassembler DPI (used in the isacov model)
+ifeq ($(DPI_DASM_SPIKE_BRANCH), master)
+  TMP7 = git clone $(DPI_DASM_SPIKE_REPO) --recurse $(DPI_DASM_SPIKE_PKG)
+else
+  TMP7 = git clone -b $(DPI_DASM_SPIKE_BRANCH) --single-branch $(DPI_DASM_SPIKE_REPO) --recurse $(DPI_DASM_SPIKE_PKG)
+endif
+
+ifeq ($(DPI_DASM_SPIKE_HASH), head)
+  CLONE_DPI_DASM_SPIKE_CMD = $(TMP7)
+else
+  CLONE_DPI_DASM_SPIKE_CMD = $(TMP7); cd $(DPI_DASM_SPIKE_PKG); git checkout $(DPI_DASM_SPIKE_HASH)
+endif
+# DPI_DASM Spike repo var end
+
 ###############################################################################
 # Imperas Instruction Set Simulator
 
@@ -352,7 +372,7 @@ endif
 	@echo ""
 	$(RISCV_EXE_PREFIX)readelf -a $< > $*.readelf
 	@echo ""
-	$(RISCV_EXE_PREFIX)objdump -D -S $*.elf > $*.objdump
+	$(RISCV_EXE_PREFIX)objdump -d -S $*.elf > $*.objdump
 
 bsp:
 	@echo "$(BANNER)"
@@ -611,7 +631,24 @@ vcs-unit-test:  vcs-run
 # Open a DVT Eclipse IDE instance with the project imported automatically
 ifeq ($(MAKECMDGOALS), open_in_dvt_ide)
 include $(CORE_V_VERIF)/mk/uvmt/dvt.mk
+else
+ifeq ($(MAKECMDGOALS), create_dvt_build_file)
+include $(CORE_V_VERIF)/mk/uvmt/dvt.mk
 endif
+endif
+
+###############################################################################
+# Build disassembler
+
+DPI_DASM_SRC    = $(DPI_DASM_PKG)/dpi_dasm.cxx $(DPI_DASM_PKG)/spike/disasm.cc $(DPI_DASM_SPIKE_PKG)/disasm/regnames.cc
+DPI_DASM_ARCH   = $(shell uname)$(shell getconf LONG_BIT)
+DPI_DASM_LIB    = $(DPI_DASM_PKG)/lib/$(DPI_DASM_ARCH)/libdpi_dasm.so
+DPI_DASM_CFLAGS = -shared -fPIC -std=c++11
+DPI_DASM_INC    = -I$(DPI_DASM_PKG) -I$(DPI_INCLUDE) -I$(DPI_DASM_SPIKE_PKG)/riscv -I$(DPI_DASM_SPIKE_PKG)/softfloat
+DPI_DASM_CXX    = g++
+
+dpi_dasm: $(DPI_DASM_SPIKE_PKG)
+	$(DPI_DASM_CXX) $(DPI_DASM_CFLAGS) $(DPI_DASM_INC) $(DPI_DASM_SRC) -o $(DPI_DASM_LIB)
 
 ###############################################################################
 # house-cleaning for unit-testing

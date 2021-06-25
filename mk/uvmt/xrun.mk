@@ -38,7 +38,7 @@ INDAGO            = $(CV_TOOL_PREFIX) indago
 IMC               = $(CV_SIM_PREFIX) imc
 
 # Paths
-XRUN_RESULTS         ?= $(if $(CV_RESULTS),$(CV_RESULTS)/xrun_results,$(MAKE_PATH)/xrun_results)
+XRUN_RESULTS         ?= $(if $(CV_RESULTS),$(abspath $(CV_RESULTS))/xrun_results,$(MAKE_PATH)/xrun_results)
 XRUN_COREVDV_RESULTS ?= $(XRUN_RESULTS)/corev-dv
 XRUN_DIR             ?= $(XRUN_RESULTS)/$(CFG)/xcelium.d
 XRUN_UVMHOME_ARG     ?= CDNS-1.2-ML
@@ -48,16 +48,18 @@ XRUN_COMP_FLAGS  ?= -64bit -disable_sem2009 -access +rwc \
                     -nowarn UEXPSC \
                     -sv -uvm -uvmhome $(XRUN_UVMHOME_ARG) \
                     $(TIMESCALE) $(SV_CMP_FLAGS)
-XRUN_RUN_BASE_FLAGS   ?= -64bit $(XRUN_GUI) -licqueue +UVM_VERBOSITY=$(XRUN_UVM_VERBOSITY) \
-                         $(XRUN_PLUSARGS) -svseed $(RNDSEED) -sv_lib $(OVP_MODEL_DPI)
+XRUN_RUN_BASE_FLAGS ?= -64bit $(XRUN_GUI) -licqueue +UVM_VERBOSITY=$(XRUN_UVM_VERBOSITY) \
+                       $(XRUN_PLUSARGS) -svseed $(RNDSEED) -sv_lib $(OVP_MODEL_DPI)
 XRUN_GUI         ?=
 XRUN_SINGLE_STEP ?=
 XRUN_ELAB_COV     = -covdut uvmt_$(CV_CORE_LC)_tb -coverage b:e:f:u
 XRUN_ELAB_COVFILE = -covfile $(abspath $(MAKE_PATH)/../tools/xrun/covfile.tcl)
 XRUN_RUN_COV      = -covscope uvmt_$(CV_CORE_LC)_tb \
 					-nowarn CGDEFN
+XRUN_RUN_BASE_FLAGS += -sv_lib $(DPI_DASM_LIB)
 
 XRUN_UVM_VERBOSITY ?= UVM_MEDIUM
+DPI_INCLUDE        ?= $(shell dirname $(shell which xrun))/../include
 
 ###############################################################################
 # Common QUIET flag defaults to -quiet unless VERBOSE is set
@@ -82,13 +84,22 @@ endif
 ################################################################################
 # Waveform generation
 # WAVES=YES enables waveform generation for entire testbench
+# WAVES_MEM=YES enables tracing memories and large vectors
 # ADV_DEBUG=YES will enable Indago waves, default is to generate SimVision waves
-ifeq ($(call IS_YES,$(WAVES)),YES)
-ifeq ($(call IS_YES,$(ADV_DEBUG)),YES)
-XRUN_RUN_WAVES_FLAGS = -input $(abspath $(MAKE_PATH)/../tools/xrun/indago.tcl)
+ifeq ($(call IS_YES,$(WAVES_MEM)),YES)
+  ifeq ($(call IS_YES,$(ADV_DEBUG)),YES)
+    XRUN_RUN_WAVES_FLAGS = -input $(abspath $(MAKE_PATH)/../tools/xrun/indago_mem.tcl)
+  else
+    XRUN_RUN_WAVES_FLAGS = -input $(abspath $(MAKE_PATH)/../tools/xrun/probe_mem.tcl)
+  endif
 else
-XRUN_RUN_WAVES_FLAGS = -input $(abspath $(MAKE_PATH)/../tools/xrun/probe.tcl)
-endif
+  ifeq ($(call IS_YES,$(WAVES)),YES)
+    ifeq ($(call IS_YES,$(ADV_DEBUG)),YES)
+      XRUN_RUN_WAVES_FLAGS = -input $(abspath $(MAKE_PATH)/../tools/xrun/indago.tcl)
+    else
+      XRUN_RUN_WAVES_FLAGS = -input $(abspath $(MAKE_PATH)/../tools/xrun/probe.tcl)
+    endif
+  endif
 endif
 
 ################################################################################
@@ -182,6 +193,9 @@ XRUN_COMP_FLAGS += -nowarn TSNSPK
 # Warning on expression coverage speedup (only counts always blocks in expression if output changes)
 XRUN_COMP_FLAGS += -nowarn COVVPO
 XRUN_RUN_COV    += -nowarn COVVPO
+
+# Warning on adding _T suffix to named block scoped assertion coverage
+XRUN_RUN_FLAGS  += -nowarn COVNBT
 
 # Warning about new style struct expression scoring
 XRUN_COMP_FLAGS += -nowarn COVEOS
@@ -300,6 +314,7 @@ test: $(XRUN_SIM_PREREQ) $(TEST_TEST_DIR)/$(TEST_PROGRAM)$(OPT_RUN_INDEX_SUFFIX)
 			+elf_file=$(TEST_TEST_DIR)/$(TEST_PROGRAM)$(OPT_RUN_INDEX_SUFFIX).elf \
 			+nm_file=$(TEST_TEST_DIR)/$(TEST_PROGRAM)$(OPT_RUN_INDEX_SUFFIX).nm \
 			+firmware=$(TEST_TEST_DIR)/$(TEST_PROGRAM)$(OPT_RUN_INDEX_SUFFIX).hex
+	$(POST_TEST)
 
 ################################################################################
 # Custom test-programs.  See comment in dsim.mk for more info
@@ -429,5 +444,5 @@ clean_eclipse:
 	rm  -rf workspace
 
 # All generated files plus the clone of the RTL
-clean_all: clean clean_eclipse clean_riscv-dv clean_test_programs clean-bsp clean_compliance clean_embench
+clean_all: clean clean_eclipse clean_riscv-dv clean_test_programs clean-bsp clean_compliance clean_embench clean_dpi_dasm_spike
 	rm -rf $(CV_CORE_PKG)
