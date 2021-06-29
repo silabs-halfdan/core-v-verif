@@ -219,8 +219,8 @@ RISCV_PREFIX     = riscv32-$(PULP_MARCH)-elf-
 RISCV_EXE_PREFIX = $(RISCV)/bin/$(RISCV_PREFIX)
 endif
 
-CFLAGS ?= -Os -g -static -mabi=ilp32 -march=rv32imczba0p93 -Wall -pedantic --verbose
-#CFLAGS ?= -Os -g -static -mabi=ilp32 -march=rv32imczba0p93_zbb0p93 -Wall -pedantic --verbose
+#CFLAGS ?= -Os -g -static -mabi=ilp32 -march=rv32imczba0p93 -Wall -pedantic --verbose
+CFLAGS ?= -Os -g -static -mabi=ilp32 -march=rv32imczba0p93_zbb0p93 -Wall -pedantic --verbose
 
 # FIXME:strichmo:Repeating this code until we fully deprecate CUSTOM_PROG, hopefully next PR
 ifeq ($(firstword $(subst _, ,$(CUSTOM_PROG))),pulp)
