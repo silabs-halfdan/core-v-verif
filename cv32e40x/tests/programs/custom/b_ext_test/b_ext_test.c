@@ -6,13 +6,17 @@ unsigned int test;
 
 int test_shnadd(void);
 int test_clz(void);
+int test_ctz(void);
+int test_cpop(void);
 
 int main(int argc, char *argv[])
 {  
   int failures=0;
 
   failures += test_shnadd();
-  //failures += test_clz();
+  failures += test_clz();
+  failures += test_ctz();
+  failures += test_cpop();
 
   if(failures == 0){
     return EXIT_SUCCESS;
@@ -22,7 +26,6 @@ int main(int argc, char *argv[])
   }
 }
 
-/*
 int test_clz(void){
   
   int failures = 0;
@@ -43,7 +46,37 @@ int test_clz(void){
   
   return failures;
 }
-*/
+
+int test_ctz(void){
+ int failures = 0;
+
+  __asm__ volatile("addi t4, zero, 32"); // Store 32 in t4
+  __asm__ volatile("ctz t5, t4");        // Store CLZ result in t5
+  __asm__ volatile("sw t5, test, t0");   // Store t5 to test
+
+  if (test != 5 ) {
+    printf("ERROR, CTZ result not as expected\n");
+    failures++;
+  }
+
+  return failures;
+}
+
+int test_cpop(void){
+ int failures = 0;
+
+  __asm__ volatile("addi t3, zero, 5"); // Store 5 in t3
+  __asm__ volatile("cpop t5, t3");      // Store cpop result in t5
+  __asm__ volatile("sw t5, test, t0");  // Store t5 to test
+
+  if (test != 2 ) {
+    printf("ERROR, CPOP result not as expected\n");
+    failures++;
+  }
+
+  return failures;
+}
+
 
 int test_shnadd(void){
   
