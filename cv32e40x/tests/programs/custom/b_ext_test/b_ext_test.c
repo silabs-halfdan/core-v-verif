@@ -8,6 +8,17 @@ int test_shnadd(void);
 int test_clz(void);
 int test_ctz(void);
 int test_cpop(void);
+int test_rol(void);
+int test_ror(void);
+int test_rori(void);
+int test_max(void);
+int test_min(void);
+int test_maxu(void);
+int test_minu(void);
+int test_or_c(void);
+int test_orn(void);
+int test_rev8(void);
+int test_bclr(void);
 
 int main(int argc, char *argv[])
 {  
@@ -17,6 +28,16 @@ int main(int argc, char *argv[])
   failures += test_clz();
   failures += test_ctz();
   failures += test_cpop();
+  failures += test_rol();
+  failures += test_ror();
+  failures += test_rori();
+  failures += test_max();
+  failures += test_min();
+  failures += test_maxu();
+  failures += test_minu();
+  failures += test_or_c();
+  failures += test_orn();
+  failures += test_rev8();
 
   if(failures == 0){
     return EXIT_SUCCESS;
@@ -71,6 +92,166 @@ int test_cpop(void){
 
   if (test != 2 ) {
     printf("ERROR, CPOP result not as expected\n");
+    failures++;
+  }
+
+  return failures;
+}
+
+int test_max(void){
+ int failures = 0;
+
+  __asm__ volatile("addi t3, zero, -7"); // Store 5 in t3
+  __asm__ volatile("addi t4, zero, 1"); // Store 1 in t4
+  __asm__ volatile("max t5, t3, t4");   // Find max
+  __asm__ volatile("sw t5, test, t0");  // Store t5 to test
+
+  if (test != 1 ) {
+    printf("ERROR, MAX result not as expected\n");
+    failures++;
+  }
+
+  return failures;
+}
+
+int test_min(void){
+ int failures = 0;
+
+  __asm__ volatile("addi t3, zero, -7"); // Store 5 in t3
+  __asm__ volatile("addi t4, zero, 1"); // Store 1 in t4
+  __asm__ volatile("min t5, t3, t4");   // Find min
+  __asm__ volatile("sw t5, test, t0");  // Store t5 to test
+
+  if (test != -7 ) {
+    printf("ERROR, MIN result not as expected\n");
+    failures++;
+  }
+
+  return failures;
+}
+
+int test_maxu(void){
+ int failures = 0;
+
+  __asm__ volatile("addi t3, zero, -7"); // Store 5 in t3
+  __asm__ volatile("addi t4, zero, 1"); // Store 1 in t4
+  __asm__ volatile("maxu t5, t3, t4");   // Find unsigned max
+  __asm__ volatile("sw t5, test, t0");  // Store t5 to test
+
+  if (test != -7 ) {
+    printf("ERROR, MAXU result not as expected\n");
+    failures++;
+  }
+
+  return failures;
+}
+
+int test_minu(void){
+ int failures = 0;
+
+  __asm__ volatile("addi t3, zero, -7"); // Store 5 in t3
+  __asm__ volatile("addi t4, zero, 1"); // Store 1 in t4
+  __asm__ volatile("minu t5, t3, t4");   // Find unsigned min
+  __asm__ volatile("sw t5, test, t0");  // Store t5 to test
+
+  if (test != 1 ) {
+    printf("ERROR, MINU result not as expected\n");
+    failures++;
+  }
+
+  return failures;
+}
+
+int test_or_c(void){
+ int failures = 0;
+
+  __asm__ volatile("addi t3, zero, 1"); // Store 1 in t3
+  __asm__ volatile("orc.b t5, t3");   // Run orc.b
+  __asm__ volatile("sw t5, test, t0");  // Store t5 to test
+
+  if (test != 0xFF ) {
+    printf("ERROR, ORC.B result not as expected: %x\n", test);
+    failures++;
+  }
+
+  return failures;
+}
+
+
+int test_orn(void){
+ int failures = 0;
+
+  __asm__ volatile("addi t3, zero, 10"); // Store 1 in t3
+  __asm__ volatile("addi t4, zero, -4"); // Store 1 in t4
+  __asm__ volatile("orn t5, t3, t4");   // ORN
+  __asm__ volatile("sw t5, test, t0");  // Store t5 to test
+
+  if (test != 0xB ) {
+    printf("ERROR, ORN result not as expected: %x\n", test);
+    failures++;
+  }
+
+  return failures;
+}
+
+int test_rev8(void){
+ int failures = 0;
+
+  __asm__ volatile("addi t3, zero, 15"); // Store 1 in t3
+  __asm__ volatile("rev8 t5, t3");       //Reverse bytes
+  __asm__ volatile("sw t5, test, t0");   // Store t5 to test
+
+  if (test != 0x0F000000 ) {
+    printf("ERROR, REV8 result not as expected: %x\n", test);
+    failures++;
+  }
+
+  return failures;
+}
+
+int test_rol(void){
+ int failures = 0;
+
+  __asm__ volatile("addi t3, zero, 7"); // Store 5 in t3
+  __asm__ volatile("addi t4, zero, 1"); // Store 1 in t4
+  __asm__ volatile("rol t5, t3, t4");   // Rotate Left
+  __asm__ volatile("sw t5, test, t0");  // Store t5 to test
+
+  if (test != 14 ) {
+    printf("ERROR, ROL result not as expected\n");
+    failures++;
+  }
+
+  return failures;
+}
+
+
+int test_ror(void){
+ int failures = 0;
+
+  __asm__ volatile("addi t3, zero, 10"); // Store 5 in t3
+  __asm__ volatile("addi t4, zero, 1"); // Store 1 in t4
+  __asm__ volatile("ror t5, t3, t4");      //
+  __asm__ volatile("sw t5, test, t0");  // Store t5 to test
+
+  if (test != 5 ) {
+    printf("ERROR, ROR result not as expected\n");
+    failures++;
+  }
+
+  return failures;
+}
+
+
+int test_rori(void){
+ int failures = 0;
+
+  __asm__ volatile("addi t3, zero, 10"); // Store 5 in t3
+  __asm__ volatile("rori t5, t3, 1");    // Rotate right
+  __asm__ volatile("sw t5, test, t0");  // Store t5 to test
+
+  if (test != 5 ) {
+    printf("ERROR, RORI result not as expected %x\n", test);
     failures++;
   }
 
