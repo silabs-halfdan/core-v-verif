@@ -29,12 +29,12 @@ class uvme_cv32e40x_cfg_c extends uvma_core_cntrl_cfg_c;
    rand int unsigned             sys_clk_period;
    
    // Agent cfg handles
-   rand uvma_isacov_cfg_c     isacov_cfg;
-   rand uvma_clknrst_cfg_c    clknrst_cfg;
-   rand uvma_interrupt_cfg_c  interrupt_cfg;
-   rand uvma_debug_cfg_c      debug_cfg;
-   rand uvma_obi_cfg_c        obi_instr_cfg;
-   rand uvma_obi_cfg_c        obi_data_cfg;
+   rand uvma_isacov_cfg_c           isacov_cfg;
+   rand uvma_clknrst_cfg_c          clknrst_cfg;
+   rand uvma_interrupt_cfg_c        interrupt_cfg;
+   rand uvma_debug_cfg_c            debug_cfg;
+   rand uvma_obi_cfg_c              obi_instr_cfg;
+   rand uvma_obi_cfg_c              obi_data_cfg;
    rand uvma_rvfi_cfg_c#(ILEN,XLEN) rvfi_cfg;
    rand uvma_rvvi_cfg_c#(ILEN,XLEN) rvvi_cfg;
    
@@ -48,7 +48,7 @@ class uvme_cv32e40x_cfg_c extends uvma_core_cntrl_cfg_c;
       `uvm_field_object(isacov_cfg    , UVM_DEFAULT)
       `uvm_field_object(clknrst_cfg   , UVM_DEFAULT)
       `uvm_field_object(interrupt_cfg , UVM_DEFAULT)
-      `uvm_field_object(debug_cfg  , UVM_DEFAULT)
+      `uvm_field_object(debug_cfg     , UVM_DEFAULT)
       `uvm_field_object(obi_instr_cfg , UVM_DEFAULT)
       `uvm_field_object(obi_data_cfg  , UVM_DEFAULT)
       `uvm_field_object(rvfi_cfg      , UVM_DEFAULT)
@@ -112,7 +112,7 @@ class uvme_cv32e40x_cfg_c extends uvma_core_cntrl_cfg_c;
          debug_cfg.enabled     == 1;
          obi_instr_cfg.enabled == 1;
          obi_data_cfg.enabled  == 1;
-         rvfi_cfg.enabled      == 1;
+         rvfi_cfg.enabled      == 1;         
          rvvi_cfg.enabled      == use_iss;
       }
       obi_instr_cfg.write_enabled == 0;
@@ -137,7 +137,7 @@ class uvme_cv32e40x_cfg_c extends uvma_core_cntrl_cfg_c;
          obi_instr_cfg.is_active == UVM_PASSIVE;
          obi_data_cfg.is_active  == UVM_PASSIVE;
          rvfi_cfg.is_active      == UVM_PASSIVE;
-         rvvi_cfg.is_active      == UVM_ACTIVE;     
+         rvvi_cfg.is_active      == UVM_ACTIVE;         
       }
       
       if (trn_log_enabled) {
@@ -154,7 +154,7 @@ class uvme_cv32e40x_cfg_c extends uvma_core_cntrl_cfg_c;
       // FIXME:strichmo:restore when debug coverage model is fixed
       debug_cfg.cov_model_enabled == 0;
 
-      if (cov_model_enabled) {
+      if (cov_model_enabled) {         
          isacov_cfg.cov_model_enabled    == 1;
          obi_instr_cfg.cov_model_enabled == 1;
          obi_data_cfg.cov_model_enabled  == 1;
@@ -200,7 +200,7 @@ function uvme_cv32e40x_cfg_c::new(string name="uvme_cv32e40x_cfg");
 
    if ($test$plusargs("USE_ISS")) 
       use_iss = 1;
-
+   
    isacov_cfg = uvma_isacov_cfg_c::type_id::create("isacov_cfg");
    clknrst_cfg  = uvma_clknrst_cfg_c::type_id::create("clknrst_cfg");
    interrupt_cfg = uvma_interrupt_cfg_c::type_id::create("interrupt_cfg");
